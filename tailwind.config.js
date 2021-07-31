@@ -17,6 +17,7 @@ module.exports = {
     extend: {
       margin: ['active'],
       borderWidth: ['active'],
+      backgroundColor: ['active'],
       height: ['hover'],
       width: ['hover']
     },
