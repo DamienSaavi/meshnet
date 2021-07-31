@@ -20,3 +20,7 @@
 .node:hover>.peers {
     display: flex;
 }
+
+.node:hover>.controls {
+    display: flex;
+}

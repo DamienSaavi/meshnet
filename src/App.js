@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Blip from './components/Blip'
+import Bloop from './components/Bloop'
 import Button from './components/Button'
 import Line from './components/Line'
 import Node from './objects/Node'
@@ -9,10 +10,15 @@ import { RANGE } from "./config/config.js"
 function App() {
     const [nodes, setNodes] = useState({})
     const [links, setLinks] = useState({})
+    const [highlightedNode, setHighlightedNode] = useState(null)
 
     useEffect(() => {
         createNode()
     }, [])
+
+    function highlightNode(id) {
+        setHighlightedNode(id)
+    }
 
     function createNode() {
         const node = new Node()
@@ -24,9 +30,12 @@ function App() {
 
     function destroyNode(node) {
         const updateNodes = { ...nodes }
+
         for (const peer of Object.values(updateNodes[node.id].peers)) {
             delete peer.peers[node.id]
         }
+
+        clearInterval(updateNodes[node.id].packetHandler)
 
         delete updateNodes[node.id]
 
@@ -71,8 +80,16 @@ function App() {
     }, [nodes])
 
     const mouseDownHandler = (node, event) => {
-        if (event.button === 1) {
-            destroyNode(node)
+        console.log('here')
+        switch (event.button) {
+            case 0:
+                node.sendData()
+                break;
+            case 1:
+                destroyNode(node)
+                break;
+            default:
+                break;
         }
     }
 
@@ -93,7 +110,7 @@ function App() {
                         <Blip
                             key={node.id}
                             node={node}
-                            onMouseDown={(event) => mouseDownHandler(node, event)}
+                            onClick={(event) => mouseDownHandler(node, event)}
                             onDrag={(pos) => updateNodePos(node, pos)} />
                     )
                     : null}
@@ -108,7 +125,6 @@ function App() {
                             to={to}
                             offset={32} />
                     })}
-
                 </svg>
             </div>
         </div >
