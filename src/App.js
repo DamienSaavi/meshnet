@@ -1,103 +1,118 @@
 import { useEffect, useState } from 'react'
-import { v4 as uuid } from 'uuid'
-import Node from './components/Node'
+import Blip from './components/Blip'
 import Button from './components/Button'
 import Line from './components/Line'
-import { RANGE } from "./config/config.js";
+import Node from './objects/Node'
+import { RANGE } from "./config/config.js"
 
 
 function App() {
-  const [nodes, setNodes] = useState([])
-  const [links, setLinks] = useState([])
+    const [nodes, setNodes] = useState({})
+    const [links, setLinks] = useState({})
 
-  function addNode() {
-    const node = { id: uuid(), pos: { x: 0, y: 0 }, peers: [] }
-    setNodes([...nodes, node])
-  }
+    useEffect(() => {
+        createNode()
+    }, [])
 
-  function updateNodePos(i, pos) {
-    const updatedNodes = [...nodes]
-    updatedNodes[i].pos = pos
-
-    setNodes(updatedNodes)
-  }
-
-  function updateNodePeers(i, peers) {
-    const updatedNodes = [...nodes]
-    updatedNodes[i].peers = peers
-
-    setNodes(updatedNodes)
-
-  }
-
-  const updateLinks = (nodes) => {
-    const updatedLinks = []
-
-    for (let i = 0; i < nodes.length - 1; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const d = Math.hypot(nodes[i].pos.x - nodes[j].pos.x, nodes[i].pos.y - nodes[j].pos.y)
-
-        if (d <= RANGE) updatedLinks.push([
-          {
-            id:nodes[i].id,
-            x: nodes[i].pos.x,
-            y: nodes[i].pos.y
-          },
-          {
-            id:nodes[j].id,
-            x: nodes[j].pos.x,
-            y: nodes[j].pos.y
-          }
-        ])
-      }
+    function createNode() {
+        const node = new Node()
+        setNodes({
+            [node.id]: node,
+            ...nodes
+        })
     }
-    setLinks(updatedLinks)
-  }
 
-  useEffect(() => {
-    updateLinks(nodes)
-  }, [nodes])
+    function destroyNode(node) {
+        const updateNodes = { ...nodes }
+        for (const peer of Object.values(updateNodes[node.id].peers)) {
+            delete peer.peers[node.id]
+        }
 
-  return (
-    <div className='h-screen w-full flex flex-col'>
-      <div className='w-full bg-gray-500 mx-auto flex justify-center items-center py-8'>
-        <Button
-          title='Add Node'
-          onClick={addNode}
-        />
-      </div>
-      <div className="relative bg-gray-700 flex-grow">
+        delete updateNodes[node.id]
 
-        {/* render nodes */}
-        {nodes.map(({ pos, id }, i) => {
-          return (
-            <>
-              <Node
-                className='node'
-                nodes={nodes.slice(0, i).concat(nodes.slice(i + 1))}
-                pos={pos}
-                id={id}
-                key={id}
-                onPosUpdate={(pos) => updateNodePos(i, pos)}
-                onPeersUpdate={(peers) => updateNodePeers(i, peers)}
-              />
-            </>
-          )
-        })}
+        setNodes(updateNodes)
+    }
 
-        {/* render links between nodes */}
-        <svg width='100%' height='100%'>
-          {links.map(link => {
-            return <Line 
-            key={link[0].id+'TO'+link[1].id}
-            from={link[0]}
-            to={link[1]}
-            offset={40} />
-          })}
-        </svg>
-      </div>
-    </div >
-  );
+    function updateNodePos(node, pos) {
+        const updatedNodes = { ...nodes }
+
+        updatedNodes[node.id].updatePos(pos)
+
+        Object.values(updatedNodes).forEach(neigh => {
+            if (node.id !== neigh.id) {
+                const d = Math.hypot(node.x - neigh.x, node.y - neigh.y)
+                if (d <= RANGE) {
+                    updatedNodes[node.id].addPeer(neigh)
+                    updatedNodes[neigh.id].addPeer(node)
+                } else {
+                    updatedNodes[node.id].removePeer(neigh)
+                    updatedNodes[neigh.id].removePeer(node)
+                }
+            }
+        })
+
+        setNodes(updatedNodes)
+    }
+
+    useEffect(() => {
+        const updatedLinks = {}
+
+        for (const node of Object.values(nodes)) {
+            for (const peer of Object.values(node.peers)) {
+                const linkID = [node.id, peer.id].sort().join('+')
+                if (!updatedLinks[linkID]) {
+                    updatedLinks[linkID] = [node.pos, peer.pos]
+                }
+            }
+        }
+
+        setLinks(updatedLinks)
+
+    }, [nodes])
+
+    const mouseDownHandler = (node, event) => {
+        if (event.button === 1) {
+            destroyNode(node)
+        }
+    }
+
+
+    return (
+        <div className='h-screen w-full flex flex-col overflow-hidden'>
+            <div className='w-full relative z-50 bg-gray-800 border-b-2 border-gray-500 mx-auto flex justify-center items-center py-4'>
+                <Button
+                    title='Add Node'
+                    onClick={createNode}
+                />
+            </div>
+            <div className="relative bg-gray-700 flex-grow">
+
+                {/* render nodes */}
+                {Object.keys(nodes).length > 0 ?
+                    Object.values(nodes).map(node =>
+                        <Blip
+                            key={node.id}
+                            node={node}
+                            onMouseDown={(event) => mouseDownHandler(node, event)}
+                            onDrag={(pos) => updateNodePos(node, pos)} />
+                    )
+                    : null}
+
+                {/* render links between nodes */}
+                <svg width='100%' height='100%'>
+                    {Object.keys(links).map(linkID => {
+                        const [from, to] = links[linkID]
+                        return <Line
+                            key={linkID}
+                            from={from}
+                            to={to}
+                            offset={32} />
+                    })}
+
+                </svg>
+            </div>
+        </div >
+    );
 }
 
 export default App;
