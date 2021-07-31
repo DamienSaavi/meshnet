@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/meshnet/static/css/main.5d2005a1.chunk.css",
+    "main.js": "/meshnet/static/js/main.4f23a211.chunk.js",
+    "main.js.map": "/meshnet/static/js/main.4f23a211.chunk.js.map",
+    "runtime-main.js": "/meshnet/static/js/runtime-main.2ed3997a.js",
+    "runtime-main.js.map": "/meshnet/static/js/runtime-main.2ed3997a.js.map",
+    "static/js/2.481142ae.chunk.js": "/meshnet/static/js/2.481142ae.chunk.js",
+    "static/js/2.481142ae.chunk.js.map": "/meshnet/static/js/2.481142ae.chunk.js.map",
+    "static/js/3.559d8b58.chunk.js": "/meshnet/static/js/3.559d8b58.chunk.js",
+    "static/js/3.559d8b58.chunk.js.map": "/meshnet/static/js/3.559d8b58.chunk.js.map",
+    "index.html": "/meshnet/index.html",
+    "static/css/main.5d2005a1.chunk.css.map": "/meshnet/static/css/main.5d2005a1.chunk.css.map",
+    "static/js/2.481142ae.chunk.js.LICENSE.txt": "/meshnet/static/js/2.481142ae.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.2ed3997a.js",
+    "static/js/2.481142ae.chunk.js",
+    "static/css/main.5d2005a1.chunk.css",
+    "static/js/main.4f23a211.chunk.js"
+  ]
+}
