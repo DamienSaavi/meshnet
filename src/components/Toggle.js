@@ -5,7 +5,6 @@ export default function Toggle({ passRef, onChange, label1, label2 }) {
                 <input
                     ref={passRef ? passRef : null}
                     type="checkbox"
-                    id="check-whitespace"
                     class="sr-only"
                     onChange={(event) => onChange ? onChange(event.target.checked) : null} />
                 <div class="toggle-bg block bg-gray-400 shadow-inner w-14 h-8 rounded-full transition"></div>

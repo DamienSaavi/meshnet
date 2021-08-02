@@ -10,7 +10,6 @@ export default function Blip({ node, className, onDrag, onClick }) {
             position={pos}
             onDrag={(event, { x, y }) => onDrag({ x, y })}
             onMouseDown={event => onClick(event)}
-
             bounds='parent'
         >
             <div
