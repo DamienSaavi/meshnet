@@ -1,11 +1,13 @@
-import React from "react"
+import React, { useRef } from "react"
 import Draggable from "react-draggable"
 
 export default function Blip({ node, className, onDrag, onClick }) {
     const { id, pos, peers } = node
+    const ref = useRef()
 
     return (
         <Draggable
+            // nodeRef={ref}
             defaultClassName={`absolute ${className}`}
             position={pos}
             onDrag={(event, { x, y }) => onDrag({ x, y })}

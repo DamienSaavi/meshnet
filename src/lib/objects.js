@@ -11,6 +11,7 @@ export class Packet {
         this.route = []
         this.station = props.station
         this.created = Date.now()
+        this.suspended = false
     }
 
     // return packet's position
@@ -23,15 +24,17 @@ export class Packet {
 export class Node {
     constructor(props) {
         this.id = uuid()
-        this.pos = { x: 0, y: 0 }
+        this.pos = props.pos || { x: 0, y: 0 }
         this.peers = {}
         this.packets = []
 
         this.updatePacketState = props.updatePacketState
 
         this.mingle = setInterval(() => {
-            this.sendData(null, Object.keys(this.peers)[0])
-        }, 800);
+            this.sendData(null, Object.keys(this.peers)[
+                Math.floor(Math.random() * Object.keys(this.peers).length)
+            ])
+        }, 500);
     }
 
     // return position's x and y
@@ -60,10 +63,7 @@ export class Node {
 
     // =============== PACKET METHODS ===============
     // create and send a packet
-    async sendData(data, destination) {
-        if (!destination)
-            destination = Object.keys(this.peers)[0]
-
+    sendData(data, destination) {
         if (!destination)
             return
 
@@ -75,17 +75,17 @@ export class Node {
         })
 
         this.storePacket(packet)
-        this.updatePacketState(packet, 'CREATE', this.id)
+        this.updatePacketState(packet, 'CREATE')
     }
 
 
     // forward packet if possible route present, otherwise put back in queue
-    async forwardPacket(packet) {
+    forwardPacket(packet) {
         if (this.peers[packet.destination]) {
             packet.route.push(this.id)
             this.peers[packet.destination].storePacket(packet)
 
-            this.updatePacketState(packet, 'UPDATE', this.id)
+            this.updatePacketState(packet, 'UPDATE')
 
         } else {
             this.storePacket(packet)
@@ -93,31 +93,63 @@ export class Node {
     }
 
     // output data content of packet
-    async openPacket(packet) {
-        this.updatePacketState(packet, 'DELETE', this.id)
+    openPacket(packet) {
+        this.updatePacketState(packet, 'DELETE')
         // console.log('PACKET RECIEVED BY ' + this.id)
         // console.log('PACKET DATA: ' + packet.data)
     }
 
     // recieve and store incoming packet
-    async storePacket(packet) {
+    storePacket(packet) {
         packet.station = this
         this.packets.push(packet)
 
         this.handlePackets()
     }
 
-    async handlePackets() {
-        const packet = this.packets.shift()
+    handlePackets() {
+        let packet
+
+        do {
+            packet = this.packets.shift()
+
+            if (packet && Date.now() - packet.created > 5000)
+                this.updatePacketState(packet, 'DELETE')
+
+        } while (packet && Date.now() - packet.created > 5000)
 
         if (packet)
             setTimeout(() => {
-                if (packet.destination === this.id)
-                    this.openPacket(packet)
-                else
-                    this.forwardPacket(packet)
-
-            }, 1000);
+                if (this.suspended) {
+                    this.updatePacketState(packet, 'DELETE')
+                } else {
+                    if (packet.destination === this.id)
+                        this.openPacket(packet)
+                    else
+                        this.forwardPacket(packet)
+                }
+            }, 600);
     }
 
+    clearPackets() {
+        let packet = this.packets.shift()
+
+        while (packet) {
+            this.updatePacketState(packet, 'DELETE')
+            packet = this.packets.shift()
+        }
+    }
+
+    clearPeers() {
+        for (const peer of Object.values(this.peers)) {
+            delete peer.peers[this.id]
+        }
+    }
+
+    suspend() {
+        this.suspended = true
+        clearInterval(this.mingle)
+        this.clearPackets()
+        this.clearPeers()
+    }
 }
