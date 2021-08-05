@@ -31,10 +31,13 @@ export class Node {
         this.updatePacketState = props.updatePacketState
 
         this.mingle = setInterval(() => {
-            this.sendData(null, Object.keys(this.peers)[
-                Math.floor(Math.random() * Object.keys(this.peers).length)
-            ])
-        }, 500);
+            setTimeout(() => {
+                if (this.suspended) return;
+                this.sendData(null, Object.keys(this.peers)[
+                    Math.floor(Math.random() * Object.keys(this.peers).length)
+                ])
+            }, Math.random() * 1200);
+        }, 800);
     }
 
     // return position's x and y

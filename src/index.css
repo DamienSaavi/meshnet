@@ -1,10 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 .line {
     stroke: rgba(255, 255, 255, 0.404);
     stroke-width: 2;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .node-range, .peers {
@@ -23,4 +23,30 @@
 
 .node:hover>.controls {
     display: flex;
+}
+
+.node-container {
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.controls {}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        stroke-width: 0;
+    }
+    to {
+        opacity: 1;
+        stroke-width: 2;
+    }
+}
+
+@keyframes expand {
+    from {
+        transform: scaleY(0)
+    }
+    to {
+        transform: scaleY(1)
+    }
 }

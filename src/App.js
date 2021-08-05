@@ -13,7 +13,7 @@ function App() {
     const packetsRef = useRef({})
 
 
-    const updatePacketState = (packet, action, id) => {
+    const updatePacketState = (packet, action) => {
         switch (action.toUpperCase()) {
             case 'CREATE':
             case 'UPDATE':
@@ -98,9 +98,6 @@ function App() {
 
     const mouseDownHandler = (node, event) => {
         switch (event.button) {
-            case 0:
-                // node.sendData()
-                break;
             case 1:
                 destroyNode(node)
                 break;
@@ -119,16 +116,30 @@ function App() {
     return (
         <div className='h-screen w-full flex flex-col overflow-hidden'>
             <div className='w-full relative z-50 bg-gray-800 border-b-2 border-gray-500 mx-auto flex justify-center items-center py-4 gap-8'>
-                <Button
-                    title='Add Node'
-                    onClick={() => createNode()}
-                />
-                <Button
-                    title='Clear'
-                    onClick={clearNetwork}
-                />
+
+                <div className='rounded-lg border-2 border-gray-400'>
+                    <button
+                        title={'Add Node'}
+                        className='flex justify-center items-center font-bold text-white  leading-none rounded-md p-3 px-3 w-40 max-w-prose border-b-4 border-blue-800 hover:bg-blue-400 bg-blue-500 active:border-b-2 -mt-0.5 active:mt-0'
+                        onClick={() => createNode()}
+                    >{'Add Node'}</button>
+                </div>
+
+                <div className='rounded-lg border-2 border-gray-400'>
+                    <button
+                        title={'Clear'}
+                        className='flex justify-center items-center font-bold text-white  leading-none rounded-md p-3 px-3 w-40 max-w-prose border-b-4 border-red-800 hover:bg-red-400 bg-red-500 active:border-b-2 -mt-0.5 active:mt-0'
+                        onClick={clearNetwork}
+                    >{'Clear'}</button>
+                </div>
+
             </div>
-            <div className="relative bg-gray-700 flex-grow">
+            <div className="relative bg-gray-700 flex-grow justify-center flex">
+
+                <div className='bg-gray-600 absolute top-0 text-white p-2 px-4 rounded-b-xl opacity-80'>
+                    <p><strong>Double click</strong> to create new node</p>
+                    <p><strong>Middle click</strong> to destroy node</p>
+                </div>
 
                 {/* render nodes */}
                 <div
@@ -139,6 +150,7 @@ function App() {
                             <Blip
                                 key={node.id}
                                 node={node}
+                                destroyNode={() => destroyNode(node)}
                                 onClick={(event) => mouseDownHandler(node, event)}
                                 onDrag={(pos) => updateNetworkByNode(node, pos)} />
                         )
@@ -152,15 +164,13 @@ function App() {
                         return <Line
                             key={linkID}
                             from={from}
-                            to={to}
-                            offset={32} />
+                            to={to} />
                     })}
 
                     {Object.keys(packets).map(id => {
                         return <Bloop
                             key={id}
-                            pos={packets[id].pos}
-                            offset={32} />
+                            pos={packets[id].pos} />
                     })}
                 </svg>
 
